@@ -1,0 +1,9 @@
+/* RESETEO TOTAL PARA QUE EL DASHBOARD OCUPE EL 100% DE LA PANTALLA */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  box-sizing: border-box;
+  overflow: hidden; /* Evita que la página completa haga scroll, solo el contenido lo hará */
+}

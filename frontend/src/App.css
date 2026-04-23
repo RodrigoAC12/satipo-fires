@@ -1,0 +1,255 @@
+/* Reseteo básico profesional */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --primary-bg: #0d122b; /* Color de fondo de la barra lateral */
+  --highlight: #6e7df3; /* Color de selección */
+  --content-bg: #f7f9fd; /* Fondo de contenido principal */
+  --border-color: #e2e8f0;
+  --text-main: #333;
+  --text-muted: #888;
+}
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background-color: var(--content-bg);
+  overflow: hidden; /* Previene scroll doble */
+}
+
+/* Diseño de diseño de administración (SaaS style) */
+.app-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* SIDEBAR: Fija y alineada */
+.sidebar {
+  width: 280px;
+  background-color: var(--primary-bg);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 2.5rem 1rem;
+  flex-shrink: 0;
+  height: 100%;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 3.5rem;
+}
+
+.logo { font-size: 2rem; }
+.logo-text .title { display: block; font-weight: bold; font-size: 1.2rem; }
+.logo-text .subtitle { font-size: 0.8rem; color: rgba(255, 255, 255, 0.7); }
+
+.nav-menu {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nav-menu button {
+  width: 100%;
+  padding: 12px;
+  background: transparent;
+  border: none;
+  color: white;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+
+.nav-menu button:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.nav-menu button.active {
+  background-color: var(--highlight);
+  font-weight: 500;
+}
+
+/* CONTENIDO PRINCIPAL: Flexible y scrollable */
+.main-viewport {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--content-bg);
+  height: 100%;
+}
+
+/* CABECERA (Header) */
+.main-header {
+  background: white;
+  padding: 1.5rem 2.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.header-info h1 { font-size: 1.5rem; color: #1e293b; }
+.header-info p { color: var(--text-muted); font-size: 0.9rem; }
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar { 
+  width: 35px; height: 35px; background: #e2e8f0; 
+  border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+  font-weight: bold; font-size: 0.8rem;
+}
+
+/* ÁREA DE TRABAJO (Content area) */
+.dashboard-content {
+  padding: 2.5rem;
+  flex: 1;
+  overflow-y: auto; /* Scroll solo en esta área */
+}
+
+/* GRILLA KPIs */
+.kpi-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.kpi-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.kpi-card .label { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 10px; }
+.kpi-card .value { font-size: 2rem; font-weight: bold; color: var(--text-main); }
+.kpi-card.precision .value { color: #6e7df3; }
+
+/* CONTENEDOR DE VISTA (EL MARCO BLANCO) */
+.view-container {
+  background: white;
+  border-radius: 12px;
+  min-height: 500px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  overflow: hidden; /* Importante para el mapa */
+  position: relative;
+}
+
+/* ESTILOS PARA LA VISTA DE REGISTRO (FORMULARIO) */
+.form-wrapper {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.view-title { text-align: center; margin-bottom: 0.5rem; color: #1e293b; }
+.view-subtitle { text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2.5rem; }
+
+.modern-form {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.form-row label {
+  width: 40%;
+  font-size: 0.95rem;
+  color: var(--text-main);
+}
+
+.form-row input, .form-row select {
+  width: 60%;
+  padding: 10px 15px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.form-row input:focus, .form-row select:focus {
+  outline: 2px solid var(--highlight);
+  border-color: var(--highlight);
+}
+
+.submit-btn {
+  margin-top: 1rem;
+  padding: 12px;
+  background-color: var(--primary-bg);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+
+.submit-btn:hover {
+  background-color: #1a234f;
+}
+
+/* ESTILOS PARA EL MAPA */
+.map-placeholder {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+}
+
+/* ESTILOS PARA LA TABLA */
+.modern-table {
+  width: 100%;
+  border-collapse: collapse;
+  padding: 1rem;
+}
+
+.modern-table th {
+  background-color: #f8fafc;
+  padding: 12px;
+  text-align: left;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: var(--text-light);
+}
+
+.modern-table td {
+  padding: 15px 12px;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.9rem;
+}
+
+.tag { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+.tag.Alto { background: #fee2e2; color: #991b1b; }
+.tag.Bajo { background: #dcfce7; color: #166534; }

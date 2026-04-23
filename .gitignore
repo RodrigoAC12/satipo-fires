@@ -1,0 +1,15 @@
+# Dependencias de Node (Frontend)
+node_modules/
+dist/
+
+# Entornos virtuales y caché de Python (Backend)
+venv/
+env/
+__pycache__/
+*.pyc
+
+# Archivos de entorno (Claves secretas)
+.env
+
+# Sistema operativo
+.DS_Store
