@@ -4,8 +4,8 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import KpiCards from './components/KpiCards';
 import MapRisks from './components/MapRisks';
-import DataHistory from './components/DataHistory';
-import RegisterZone from './components/RegisterZone';
+import DataHistory from './pages/DataHistory';
+import RegisterZone from './pages/RegisterZone';
 
 const App = () => {
   // Estado para la vista actual: 'mapa', 'historial', 'registro'

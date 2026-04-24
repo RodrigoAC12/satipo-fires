@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware # <-- Nueva importación
 from app.infrastructure.database import engine, Base
-from app.infrastructure import models
-from app.presentation.api import router as api_router
+from app.infrastructure.adapters.output import models
+from app.infrastructure.adapters.input.api import router as api_router
 
 Base.metadata.create_all(bind=engine)
 
