@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 const RegisterZone = () => {
-  // Estado unificado para todos los campos del formulario
+  // CORRECCIÓN: Cambiamos 'nombre' por 'nombre_sector' para que coincida con FastAPI
   const [formData, setFormData] = useState({
-    nombre: '',
+    nombre_sector: '', 
     latitud: '-11.325',
     longitud: '-74.531',
     temperatura: '',
@@ -28,7 +28,7 @@ const RegisterZone = () => {
       return;
     }
 
-    // ATENCIÓN: Reemplaza este string con tu API Key real de OpenWeatherMap
+    // API Key de OpenWeatherMap
     const API_KEY = "fa7d867d836ee4e030089e68680a7812"; 
     const url = `https://api.openweathermap.org/data/2.5/weather?lat=${formData.latitud}&lon=${formData.longitud}&units=metric&appid=${API_KEY}`;
     
@@ -52,8 +52,8 @@ const RegisterZone = () => {
     try {
       await axios.post('http://localhost:8000/zonas/', formData);
       alert("Zona registrada y analizada correctamente.");
-      // Limpiar formulario tras guardar
-      setFormData({ nombre: '', latitud: '', longitud: '', temperatura: '', humedad: '', ndvi: '', pendiente: '' });
+      // CORRECCIÓN: Limpiar formulario usando 'nombre_sector'
+      setFormData({ nombre_sector: '', latitud: '', longitud: '', temperatura: '', humedad: '', ndvi: '', pendiente: '' });
     } catch (error) {
       console.error("Error al guardar:", error);
       alert("Hubo un error al guardar la zona.");
@@ -68,7 +68,8 @@ const RegisterZone = () => {
       <form className="modern-form" onSubmit={handleSubmit}>
         <div className="form-row">
           <label>Nombre del Sector</label>
-          <input type="text" name="nombre" value={formData.nombre} onChange={handleChange} placeholder="Ej. Mazamari Sur" required />
+          {/* CORRECCIÓN: name="nombre_sector" y value={formData.nombre_sector} */}
+          <input type="text" name="nombre_sector" value={formData.nombre_sector} onChange={handleChange} placeholder="Ej. Mazamari Sur" required />
         </div>
         
         <div className="form-row">

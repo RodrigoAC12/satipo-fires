@@ -16,7 +16,8 @@ def registrar_zona_riesgo(db: Session, zona: ZonaRiesgo):
     riesgo_calculado = predecir_riesgo_incendio(
         temperatura=zona.temperatura, 
         humedad=zona.humedad, 
-        ndvi=zona.ndvi
+        ndvi=zona.ndvi,
+        pendiente=zona.pendiente
     )
     
     # 2. Mapeo de Entidad de Dominio a Modelo de Persistencia (Infrastructure)

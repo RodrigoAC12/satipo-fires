@@ -1,13 +1,28 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const DataHistory = () => {
-  // Datos simulados para la tabla
-  const zones = [
-    { id: 1, sector: "Mazamari Centro", risk: "Alto", temp: 35.5, hum: 20, ndvi: 0.15, slope: 30 },
-    { id: 2, sector: "Pampa Hermosa", risk: "Bajo", temp: 25.0, hum: 60, ndvi: 0.65, slope: 10 },
-    { id: 3, sector: "Rio Tambo Norte", risk: "Alto", temp: 34.0, hum: 22, ndvi: 0.20, slope: 35 },
-    { id: 4, sector: "Satipo Sur", risk: "Bajo", temp: 24.5, hum: 65, ndvi: 0.70, slope: 12 },
-  ];
+  // 1. Estado para almacenar las zonas que vienen de la Base de Datos
+  const [zones, setZones] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // 2. Función para traer los datos del Backend
+  useEffect(() => {
+    const fetchZonas = async () => {
+      try {
+        const response = await axios.get("http://localhost:8000/zonas/");
+        setZones(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error al traer el historial:", error);
+        setLoading(false);
+      }
+    };
+
+    fetchZonas();
+  }, []);
+
+  if (loading) return <p style={{ textAlign: 'center', padding: '20px' }}>Cargando historial...</p>;
 
   return (
     <div className="table-wrapper">
@@ -23,16 +38,28 @@ const DataHistory = () => {
           </tr>
         </thead>
         <tbody>
-          {zones.map((zone) => (
-            <tr key={zone.id}>
-              <td>{zone.sector}</td>
-              <td><span className={`tag ${zone.risk}`}>{zone.risk}</span></td>
-              <td>{zone.temp}°C</td>
-              <td>{zone.hum}%</td>
-              <td>{zone.ndvi}</td>
-              <td>{zone.slope}°</td>
+          {/* 3. Renderizado de datos REALES */}
+          {zones.length > 0 ? (
+            zones.map((zone) => (
+              <tr key={zone.id}>
+                {/* Usamos los nombres de campos que vienen de FastAPI */}
+                <td>{zone.nombre_sector}</td>
+                <td>
+                  <span className={`tag ${zone.nivel_riesgo?.toLowerCase()}`}>
+                    {zone.nivel_riesgo}
+                  </span>
+                </td>
+                <td>{zone.temperatura}°C</td>
+                <td>{zone.humedad}%</td>
+                <td>{zone.ndvi}</td>
+                <td>{zone.pendiente}°</td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="6" style={{ textAlign: 'center' }}>No hay datos registrados aún.</td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>

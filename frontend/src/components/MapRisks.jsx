@@ -25,21 +25,28 @@ const MapRisks = () => {
 
   // Llamada a la API al cargar el componente
   useEffect(() => {
-    const obtenerPuntosNASA = async () => {
+    const obtenerPuntos = async () => {
       try {
-        // Petición al backend (ajusta la ruta '/puntos-calor' según tu FastAPI)
-        const response = await axios.get('http://localhost:8000/puntos-calor');
+        // Petición al backend (conectado a tu base de datos y FastAPI)
+        const response = await axios.get("http://localhost:8000/zonas/");
         setFirePoints(response.data);
       } catch (error) {
         console.error("Error al conectar con la API del Backend:", error);
-        // Salvavidas para el PMV: Si el backend falla, mostramos un punto simulado
+        // Salvavidas: Si el backend falla, mostramos un punto simulado con el formato CORRECTO
         setFirePoints([
-          { id: 999, lat: -11.26, lon: -74.65, confidence: "Alta", satellite: "VIIRS (Simulado)" }
+          { 
+            id: 999, 
+            nombre_sector: "Sector Simulado (Fallo API)", 
+            latitud: -11.26, 
+            longitud: -74.65, 
+            nivel_riesgo: "Alto",
+            temperatura: 35
+          }
         ]);
       }
     };
 
-    obtenerPuntosNASA();
+    obtenerPuntos();
   }, []);
 
   return (
@@ -54,21 +61,29 @@ const MapRisks = () => {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
-        {/* Renderizado dinámico de los Puntos de la NASA */}
-        {firePoints.map((point) => (
-          <CircleMarker 
-            key={point.id} 
-            center={[point.lat, point.lon]} 
-            pathOptions={{ color: '#ef4444', fillColor: '#ef4444', fillOpacity: 0.7 }}
-            radius={10}
-          >
-            <Popup>
-              <strong>🔥 Fuego detectado</strong><br />
-              Satelite: {point.satellite}<br />
-              Confianza: {point.confidence}
-            </Popup>
-          </CircleMarker>
-        ))}
+        {/* Renderizado dinámico de las Zonas de Riesgo desde tu Base de Datos */}
+        {firePoints.map((point, index) => {
+          // Validación de seguridad: Solo dibuja el punto si tiene latitud y longitud válidas
+          if (point.latitud && point.longitud) {
+            return (
+              <CircleMarker 
+                key={point.id || index} 
+                center={[point.latitud, point.longitud]} 
+                pathOptions={{ color: '#ef4444', fillColor: '#ef4444', fillOpacity: 0.7 }}
+                radius={10}
+              >
+                <Popup>
+                  <strong>🔥 Zona Evaluada</strong><br />
+                  <strong>Sector:</strong> {point.nombre_sector || 'Desconocido'}<br />
+                  <strong>Riesgo:</strong> {point.nivel_riesgo || 'No calculado'}<br />
+                  <strong>Temp:</strong> {point.temperatura}°C
+                </Popup>
+              </CircleMarker>
+            );
+          }
+          // Si el punto no tiene coordenadas, no hace nada para evitar que se caiga la página
+          return null;
+        })}
         
         {/* Marcador Azul Principal */}
         <Marker position={position}>
