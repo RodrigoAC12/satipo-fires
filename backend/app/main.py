@@ -1,10 +1,18 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware # <-- Nueva importación
+from fastapi.middleware.cors import CORSMiddleware
 from app.infrastructure.database import engine, Base
 from app.infrastructure.adapters.output import models
 from app.infrastructure.adapters.input.api import router as api_router
+import logging
 
-Base.metadata.create_all(bind=engine)
+logger = logging.getLogger(__name__)
+
+# Intentamos crear las tablas, pero no fallaremos si la BD no está disponible
+try:
+    Base.metadata.create_all(bind=engine)
+    logger.info("Tablas de base de datos creadas/verificadas exitosamente.")
+except Exception as e:
+    logger.warning(f"Advertencia al crear tablas de BD: {e}. La BD puede no estar disponible.")
 
 app = FastAPI(
     title="API de Predicción de Incendios - Satipo",

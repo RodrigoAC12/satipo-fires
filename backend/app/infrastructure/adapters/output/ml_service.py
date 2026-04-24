@@ -1,18 +1,41 @@
 import joblib
 import os
 import pandas as pd
+import logging
+
+logger = logging.getLogger(__name__)
 
 # 1. Buscamos la ruta exacta donde se guardó nuestro archivo binario
+# El modelo está 2 niveles arriba: infrastructure/modelo_rf.joblib
 DIRECTORIO_ACTUAL = os.path.dirname(os.path.abspath(__file__))
-RUTA_MODELO = os.path.join(DIRECTORIO_ACTUAL, 'modelo_rf.joblib')
+INFRASTRUCTURE_DIR = os.path.dirname(os.path.dirname(DIRECTORIO_ACTUAL))
+POSIBLES_RUTAS = [
+    os.path.join(INFRASTRUCTURE_DIR, 'modelo_rf.joblib'),
+    os.path.join(INFRASTRUCTURE_DIR, 'app', 'infrastructure', 'modelo_rf.joblib'),
+    os.path.join(DIRECTORIO_ACTUAL, 'modelo_rf.joblib'),
+]
+
+RUTA_MODELO = None
+for ruta_posible in POSIBLES_RUTAS:
+    if os.path.exists(ruta_posible):
+        RUTA_MODELO = ruta_posible
+        logger.info(f"Archivo del modelo encontrado en: {RUTA_MODELO}")
+        break
+
+if RUTA_MODELO is None:
+    logger.warning(f"Archivo del modelo NO encontrado. Rutas verificadas: {POSIBLES_RUTAS}")
 
 # 2. Cargamos el modelo a la memoria (se hace una sola vez al encender el servidor)
-try:
-    modelo_rf = joblib.load(RUTA_MODELO)
-    print("Modelo Random Forest cargado exitosamente en la API.")
-except Exception as e:
-    print(f"Error al cargar el modelo: {e}")
-    modelo_rf = None
+modelo_rf = None
+if RUTA_MODELO is not None:
+    try:
+        modelo_rf = joblib.load(RUTA_MODELO)
+        logger.info("Modelo Random Forest cargado exitosamente en la API.")
+    except Exception as e:
+        logger.error(f"Error al cargar el modelo: {e}")
+        modelo_rf = None
+else:
+    logger.error("No se pudo localizar el archivo del modelo.")
 
 # 3. La función que usará el caso de uso
 def predecir_riesgo_incendio(temperatura: float, humedad: float, ndvi: float, pendiente: float) -> str: # <-- Añadir pendiente

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 
 # Esta es la regla de negocio pura. Así entendemos una Zona de Riesgo.
@@ -12,5 +12,4 @@ class ZonaRiesgo(BaseModel):
     pendiente: float
     nivel_riesgo: Optional[str] = "No evaluado"
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)

@@ -3,6 +3,9 @@ from app.domain.entities.entities import ZonaRiesgo
 from app.infrastructure.adapters.output.models import ZonaRiesgoDB
 from app.infrastructure.adapters.output.ml_service import predecir_riesgo_incendio
 from sqlalchemy import func
+import logging
+
+logger = logging.getLogger(__name__)
 
 def registrar_zona_riesgo(db: Session, zona: ZonaRiesgo):
     """
@@ -38,10 +41,11 @@ def registrar_zona_riesgo(db: Session, zona: ZonaRiesgo):
         db.add(db_zona)
         db.commit()
         db.refresh(db_zona)
+        logger.info(f"Zona '{zona.nombre_sector}' registrada exitosamente con riesgo: {riesgo_calculado}")
         return db_zona
     except Exception as e:
         db.rollback()
-        print(f"Error al persistir en base de datos: {e}")
+        logger.error(f"Error al persistir en base de datos: {e}")
         raise e
 
 def obtener_zonas_riesgo(db: Session):

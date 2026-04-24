@@ -2,8 +2,8 @@
 echo === INICIANDO SISTEMA SATIPO-IA ===
 
 :: Iniciar Backend
-:: Cambiamos main:app por la ruta real que vimos en tus errores
-start cmd /k "cd backend && venv\Scripts\activate && uvicorn main:app --reload --port 8000"
+:: Usamos app.main:app porque tu main.py ahora vive dentro de la carpeta "app"
+start cmd /k "cd backend && venv\Scripts\activate && uvicorn app.main:app --reload --port 8000"
 
 :: Iniciar Frontend
 start cmd /k "cd frontend && npm run dev"

@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.infrastructure.database import get_db
-from app.domain.entities import ZonaRiesgo
+from app.domain.entities.entities import ZonaRiesgo
 
 # Importamos AMBOS casos de uso (guardar y leer)
-from app.application.use_cases import registrar_zona_riesgo, obtener_zonas_riesgo, obtener_estadisticas # <-- Agrega obtener_estadisticas
+from app.application.useCases.use_cases import registrar_zona_riesgo, obtener_zonas_riesgo, obtener_estadisticas
 
 router = APIRouter()
 
