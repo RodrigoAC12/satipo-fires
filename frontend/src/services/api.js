@@ -1,16 +1,36 @@
 import axios from 'axios';
 
-// Obtener la URL base de la API desde variables de entorno
+// Obtener la URL base de la API desde variables de entorno o usar localhost
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+console.log('🌐 API Base URL:', API_BASE_URL);
 
 // Cliente HTTP centralizado
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
   }
 });
+
+// Interceptor para manejar errores globales
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response) {
+      // Error con respuesta del servidor
+      console.error('❌ Error del servidor:', error.response.status, error.response.data);
+    } else if (error.request) {
+      // Error sin respuesta (conexión rechazada, timeout, etc)
+      console.error('❌ Error de conexión:', error.request);
+      console.error('📌 ¿Backend corriendo en', API_BASE_URL, '?');
+    } else {
+      console.error('❌ Error:', error.message);
+    }
+    return Promise.reject(error);
+  }
+);
 
 // ============ ZONA RIESGO ENDPOINTS ============
 
@@ -19,10 +39,12 @@ const apiClient = axios.create({
  */
 export const crearZona = async (zonaData) => {
   try {
+    console.log('📤 Enviando zona:', zonaData);
     const response = await apiClient.post('/zonas/', zonaData);
+    console.log('✅ Zona creada:', response.data);
     return response.data;
   } catch (error) {
-    console.error('Error al crear zona:', error);
+    console.error('❌ Error al crear zona:', error.message);
     throw error;
   }
 };
@@ -32,10 +54,12 @@ export const crearZona = async (zonaData) => {
  */
 export const obtenerZonas = async () => {
   try {
+    console.log('📥 Obteniendo zonas...');
     const response = await apiClient.get('/zonas/');
+    console.log('✅ Zonas obtenidas:', response.data);
     return response.data;
   } catch (error) {
-    console.error('Error al obtener zonas:', error);
+    console.error('❌ Error al obtener zonas:', error.message);
     throw error;
   }
 };
@@ -45,9 +69,15 @@ export const obtenerZonas = async () => {
  */
 export const obtenerEstadisticas = async () => {
   try {
+    console.log('📊 Obteniendo estadísticas...');
     const response = await apiClient.get('/stats/');
+    console.log('✅ Estadísticas obtenidas:', response.data);
     return response.data;
   } catch (error) {
+    console.error('❌ Error al obtener estadísticas:', error.message);
+    throw error;
+  }
+};
     console.error('Error al obtener estadísticas:', error);
     throw error;
   }
