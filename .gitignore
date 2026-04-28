@@ -1,0 +1,10 @@
+pycache/
+*.py[cod]
+*$py.class
+venv/
+.env
+.DS_Store
+Thumbs.db
+.git/
+.vscode/
+*.pkl
