@@ -14,7 +14,8 @@ function App() {
 
   const fetchHistory = async () => {
     try {
-      const res = await fetch('http://localhost:8000/history');
+      // 🚀 CAMBIO A URL DE RENDER
+      const res = await fetch('https://satipo-fires.onrender.com/history');
       const data = await res.json();
       setHistory(data);
     } catch (e) {
@@ -34,7 +35,8 @@ function App() {
   const handleEvaluate = async (formData) => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:8000/predict', {
+      // 🚀 CAMBIO A URL DE RENDER
+      const res = await fetch('https://satipo-fires.onrender.com/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -63,20 +65,20 @@ function App() {
         </aside>
 
         {/* LADO DERECHO: Mapa arriba, Tabla abajo */}
-<main className="right-panel">
-  <div className="map-container-wrapper">
-    <MapPanel 
-        history={history} 
-        onMapClick={handleMapClick} 
-        selectedData={autoFormData} // <-- Añadimos esto
-    />
-  </div>
-  
-  <div className="history-section">
-    <h3 style={{marginTop: 0, color: '#1b5e20', fontSize: '1.1rem'}}>📜 Historial de Monitoreo</h3>
-    <HistoryTable history={history} />
-  </div>
-</main>
+        <main className="right-panel">
+          <div className="map-container-wrapper">
+            <MapPanel 
+                history={history} 
+                onMapClick={handleMapClick} 
+                selectedData={autoFormData} 
+            />
+          </div>
+          
+          <div className="history-section">
+            <h3 style={{marginTop: 0, color: '#1b5e20', fontSize: '1.1rem'}}>📜 Historial de Monitoreo</h3>
+            <HistoryTable history={history} />
+          </div>
+        </main>
       </div>
     </div>
   );
