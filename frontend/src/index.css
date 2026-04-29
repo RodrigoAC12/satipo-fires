@@ -187,3 +187,43 @@ th {
   font-weight: 600;
   color: #333;
 }
+
+/* --- RESPONSIVE DESIGN --- */
+
+/* Cuando la pantalla mide menos de 850px (Celulares y Tablets) */
+@media (max-width: 850px) {
+  .dashboard-main {
+    display: flex;
+    flex-direction: column; /* Apila los paneles verticalmente */
+    height: auto;
+    overflow-y: visible;
+    padding: 10px;
+  }
+
+  .sidebar {
+    width: 100% !important; /* El panel de control ocupa todo el ancho */
+    max-width: none;
+    position: static;
+    margin-bottom: 20px;
+  }
+
+  .right-panel {
+    width: 100%;
+    height: auto;
+  }
+
+  .map-container-wrapper {
+    height: 350px; /* Reducimos un poco el mapa para que no ocupe toda la pantalla */
+    margin-bottom: 20px;
+  }
+
+  .top-nav h1 {
+    font-size: 1.2rem; /* Texto más pequeño para que quepa en el móvil */
+  }
+}
+
+/* Ajustes para el mapa dentro de Leaflet */
+.leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+}
