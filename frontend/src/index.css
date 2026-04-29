@@ -190,40 +190,70 @@ th {
 
 /* --- RESPONSIVE DESIGN --- */
 
-/* Cuando la pantalla mide menos de 850px (Celulares y Tablets) */
+/* --- RESPONSIVE DESIGN OPTIMIZADO --- */
+
 @media (max-width: 850px) {
+  /* Forzamos que el contenedor no tenga scroll interno, que lo maneje el celular */
+  .app-wrapper {
+    height: auto;
+    overflow: auto;
+  }
+
   .dashboard-main {
     display: flex;
-    flex-direction: column; /* Apila los paneles verticalmente */
+    flex-direction: column; 
     height: auto;
     overflow-y: visible;
     padding: 10px;
+    gap: 15px; /* Espacio uniforme entre secciones */
   }
 
   .sidebar {
-    width: 100% !important; /* El panel de control ocupa todo el ancho */
+    width: 100% !important;
     max-width: none;
     position: static;
-    margin-bottom: 20px;
+    margin-bottom: 0; /* Controlado por el gap del dashboard */
+  }
+
+  /* Ajuste para que los inputs del formulario sean fáciles de tocar */
+  .sidebar input, .sidebar select, .sidebar button {
+    font-size: 16px !important; /* Evita que iOS haga zoom automático al enfocar */
+    padding: 12px !important;
+    width: 100%;
   }
 
   .right-panel {
     width: 100%;
     height: auto;
+    display: flex;
+    flex-direction: column;
   }
 
   .map-container-wrapper {
-    height: 350px; /* Reducimos un poco el mapa para que no ocupe toda la pantalla */
-    margin-bottom: 20px;
+    height: 400px; /* Un poco más alto para que sea usable con el dedo */
+    border-radius: 8px;
+    z-index: 1; /* Evita que se superponga a menús */
+  }
+
+  /* El historial debe tener su propio scroll lateral obligatorio */
+  .history-section {
+    width: 100%;
+    overflow-x: hidden; /* Evitamos que toda la web baile */
+  }
+
+  .history-section h3 {
+    font-size: 1rem;
+    margin-bottom: 10px;
+  }
+
+  .top-nav {
+    flex-direction: column;
+    text-align: center;
+    padding: 10px;
   }
 
   .top-nav h1 {
-    font-size: 1.2rem; /* Texto más pequeño para que quepa en el móvil */
+    font-size: 1.1rem;
+    margin-bottom: 5px;
   }
-}
-
-/* Ajustes para el mapa dentro de Leaflet */
-.leaflet-container {
-  width: 100% !important;
-  height: 100% !important;
 }
