@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, CircleMarker, Marker, Popup, useMap, useMapEve
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
-// Icono desde CDN para evitar problemas de carga
+// Icono estándar compatible con todos los navegadores
 const bulletproofIcon = new L.Icon({
     iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
     iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
@@ -14,6 +14,7 @@ const bulletproofIcon = new L.Icon({
     shadowSize: [41, 41]
 });
 
+// Controlador para mover la cámara suavemente
 function MapController({ targetCenter }) {
   const map = useMap();
   useEffect(() => {
@@ -28,7 +29,7 @@ const MapPanel = ({ history, onMapClick, targetCenter, selectedData }) => {
   const defaultCenter = [-11.2522, -74.6383];
   const [instantClickPos, setInstantClickPos] = useState(null);
 
-  // Sincronizar posición cuando el padre actualiza los datos
+  // Sincronizar posición cuando se selecciona una fila del historial
   useEffect(() => {
     if (selectedData && (selectedData.latitude || selectedData.lat)) {
       setInstantClickPos({
@@ -38,17 +39,13 @@ const MapPanel = ({ history, onMapClick, targetCenter, selectedData }) => {
     }
   }, [selectedData]);
 
+  // Manejador de clics en el mapa
   function MapInteraction() {
     useMapEvents({
       click(e) {
-        if (instantClickPos) {
-          // Si ya hay un pin, el siguiente clic lo borra
-          setInstantClickPos(null);
-        } else {
-          // Si no hay nada, ponemos el pin y pedimos datos
-          setInstantClickPos({ lat: e.latlng.lat, lng: e.latlng.lng });
-          if (onMapClick) onMapClick(e.latlng.lat, e.latlng.lng);
-        }
+        // En móviles, esto permite poner el marcador con un toque
+        setInstantClickPos({ lat: e.latlng.lat, lng: e.latlng.lng });
+        if (onMapClick) onMapClick(e.latlng.lat, e.latlng.lng);
       },
     });
     return null;
@@ -64,57 +61,65 @@ const MapPanel = ({ history, onMapClick, targetCenter, selectedData }) => {
   };
 
   return (
-    <MapContainer center={defaultCenter} zoom={10} style={{ height: '100%', width: '100%', borderRadius: '8px' }}>
-      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+    <MapContainer 
+      center={defaultCenter} 
+      zoom={10} 
+      style={{ height: '100%', width: '100%', borderRadius: '8px' }}
+      tap={true} // Habilita soporte para clics en Safari iOS
+    >
+      <TileLayer 
+        attribution='&copy; OpenStreetMap'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" 
+      />
       
       <MapInteraction />
       <MapController targetCenter={targetCenter} />
 
+      {/* Marcador del punto actual seleccionado */}
       {instantClickPos && (
         <Marker position={[instantClickPos.lat, instantClickPos.lng]} icon={bulletproofIcon}>
           <Popup>
-            <div style={{ minWidth: '150px' }}>
-              <h4 style={{ margin: '0', color: '#1b5e20' }}>📍 Punto Seleccionado</h4>
-              <hr style={{ border: '0.5px solid #eee', margin: '8px 0' }} />
-              
-              <p style={{ margin: '5px 0' }}><strong>Lat:</strong> {instantClickPos.lat.toFixed(4)}</p>
-              <p style={{ margin: '5px 0' }}><strong>Lon:</strong> {instantClickPos.lng.toFixed(4)}</p>
+            <div style={{ minWidth: '160px', padding: '5px' }}>
+              <h4 style={{ margin: '0 0 8px 0', color: '#1b5e20', borderBottom: '1px solid #eee' }}>📍 Punto Seleccionado</h4>
+              <p style={{ margin: '4px 0' }}><strong>Lat:</strong> {instantClickPos.lat.toFixed(4)}</p>
+              <p style={{ margin: '4px 0' }}><strong>Lon:</strong> {instantClickPos.lng.toFixed(4)}</p>
               
               {(selectedData?.temperature !== undefined || selectedData?.temp !== undefined) ? (
-                <>
-                  <p style={{ margin: '5px 0', fontSize: '1.1rem' }}>
+                <div style={{ marginTop: '8px', background: '#f9f9f9', padding: '8px', borderRadius: '4px' }}>
+                  <p style={{ margin: '0', fontSize: '1.1rem', textAlign: 'center' }}>
                     🌡️ <strong>{selectedData.temperature ?? selectedData.temp}°C</strong>
                   </p>
-                  <p style={{ margin: '5px 0', color: '#666' }}>
+                  <p style={{ margin: '4px 0 0 0', color: '#666', fontSize: '0.85rem', textAlign: 'center' }}>
                     💧 Humedad: {selectedData.humidity ?? selectedData.humedad ?? '-'}%
                   </p>
-                </>
+                </div>
               ) : (
-                <p style={{ margin: '5px 0', color: '#e65100', fontSize: '0.9rem' }}>⏳ Obteniendo clima...</p>
+                <p style={{ margin: '8px 0 0 0', color: '#e65100', fontSize: '0.9rem', textAlign: 'center' }}>⏳ Obteniendo clima...</p>
               )}
             </div>
           </Popup>
         </Marker>
       )}
 
+      {/* Círculos del historial de alertas */}
       {history && history.map((item, index) => (
         <CircleMarker
-          key={index}
+          key={item.id || index}
           center={[item.latitude, item.longitude]}
           pathOptions={{
             color: getRiskColor(item.risk_level || item.riesgo),
             fillColor: getRiskColor(item.risk_level || item.riesgo),
-            fillOpacity: 0.8
+            fillOpacity: 0.6
           }}
           radius={8}
         >
           <Popup>
-            <div style={{ textAlign: 'center' }}>
+            <div style={{ textAlign: 'center', padding: '5px' }}>
               <h4 style={{ margin: '0', color: getRiskColor(item.risk_level || item.riesgo) }}>
-                {item.risk_level || item.riesgo}
+                {(item.risk_level || item.riesgo || 'N/A').toUpperCase()}
               </h4>
-              <p style={{ fontSize: '0.8rem', margin: '5px 0' }}>
-                {new Date(item.created_at || item.fecha).toLocaleString()}
+              <p style={{ fontSize: '0.75rem', margin: '8px 0 0 0', color: '#666' }}>
+                📅 {new Date(item.created_at || item.fecha).toLocaleString('es-PE')}
               </p>
             </div>
           </Popup>

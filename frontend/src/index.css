@@ -1,4 +1,4 @@
-/* 1. REGLA MAESTRA DE SIMETRÍA */
+/* 1. REGLA MAESTRA DE SIMETRÍA Y COMPATIBILIDAD */
 *, *::before, *::after {
   box-sizing: border-box;
 }
@@ -11,21 +11,24 @@
   --border-color: #e0e0e0;
 }
 
-body {
+html, body {
   margin: 0;
   padding: 0;
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   background-color: var(--bg-app);
   color: #2c3e50;
-  overflow: hidden; /* Evita scrolls dobles en toda la pantalla */
+  /* En escritorio bloqueamos el scroll doble, en móvil lo liberamos vía media query */
+  overflow: hidden; 
+  height: 100%;
 }
 
-/* 2. LAYOUT PRINCIPAL PERFECTAMENTE CUADRADO */
+/* 2. LAYOUT PRINCIPAL */
 .app-wrapper {
   display: flex;
   flex-direction: column;
   height: 100vh;
   width: 100vw;
+  -webkit-overflow-scrolling: touch; /* Suavidad para Safari iOS */
 }
 
 .top-nav {
@@ -37,7 +40,7 @@ body {
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  z-index: 10;
+  z-index: 1000;
   flex-shrink: 0;
 }
 
@@ -45,16 +48,18 @@ body {
   margin: 0; 
   font-size: 1.2rem; 
   text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-/* 3. REJILLA SIMÉTRICA (SIDEBAR FIJO + MAPA FLUIDO) */
+/* 3. REJILLA SIMÉTRICA (ESCRITORIO) */
 .dashboard-main {
   display: grid;
-  grid-template-columns: 420px 1fr; /* Panel un poco más ancho para que respiren los inputs */
-  height: calc(100vh - 60px); /* Altura exacta menos el nav */
+  grid-template-columns: 420px 1fr;
+  height: calc(100vh - 60px);
+  overflow: hidden;
 }
 
-/* 4. PANEL LATERAL (SCROLL INTERNO LIMPIO) */
+/* 4. PANEL LATERAL */
 .sidebar {
   background: white;
   padding: 24px;
@@ -62,46 +67,31 @@ body {
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
-  gap: 24px; /* Espaciado exacto entre tarjetas */
+  gap: 24px;
 }
 
-/* 5. TARJETAS SIMÉTRICAS */
+/* 5. TARJETAS Y FORMULARIOS */
 .card {
   background: white;
   border-radius: 8px;
   padding: 20px;
   border: 1px solid var(--border-color);
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  width: 100%; /* Fuerza a ocupar el 100% de la columna */
 }
 
 .card h2 {
   font-size: 1.1rem;
   color: var(--primary);
-  margin-top: 0;
-  margin-bottom: 20px;
+  margin: 0 0 20px 0;
   padding-bottom: 10px;
   border-bottom: 2px solid #f0f0f0;
-}
-
-/* 6. ALINEACIÓN PERFECTA DEL FORMULARIO */
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px; /* Separación vertical uniforme */
-}
-
-/* Si usas un grid dentro del form para 2 columnas */
-.form-grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  margin-bottom: 15px;
 }
 
 .form-group label {
@@ -110,13 +100,13 @@ form {
   color: #555;
 }
 
-input {
+input, select {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid var(--border-color);
   border-radius: 6px;
-  font-size: 0.95rem;
-  transition: border-color 0.2s;
+  font-size: 16px; /* Mínimo 16px para evitar auto-zoom en Safari iOS */
+  transition: all 0.2s;
 }
 
 input:focus {
@@ -125,7 +115,7 @@ input:focus {
   box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.1);
 }
 
-/* 7. BOTÓN SIMÉTRICO */
+/* 6. BOTONES */
 .btn {
   width: 100%;
   padding: 12px;
@@ -137,14 +127,11 @@ input:focus {
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
-  margin-top: 8px;
 }
 
-.btn:hover {
-  background: var(--primary-hover);
-}
+.btn:hover { background: var(--primary-hover); }
 
-/* 8. CONTENEDOR DEL MAPA Y TABLA */
+/* 7. PANEL DERECHO (MAPA + TABLA) */
 .right-panel {
   display: flex;
   flex-direction: column;
@@ -153,107 +140,68 @@ input:focus {
 }
 
 .map-container-wrapper {
-  flex: 1; /* El mapa toma todo el espacio superior disponible */
+  flex: 1;
   position: relative;
-}
-
-.leaflet-container {
-  height: 100% !important;
-  width: 100% !important;
+  z-index: 1;
 }
 
 .history-section {
-  height: 300px; /* Altura fija para la tabla abajo del mapa */
+  height: 350px;
   background: white;
   border-top: 1px solid var(--border-color);
   padding: 20px;
   overflow-y: auto;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-}
-
-th, td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid var(--border-color);
-}
-
-th {
-  background: #f8f9fa;
-  font-weight: 600;
-  color: #333;
-}
-
-/* --- RESPONSIVE DESIGN --- */
-
-/* --- RESPONSIVE DESIGN OPTIMIZADO --- */
-
+/* --- RESPONSIVE DESIGN (SAFARI, CHROME, MÓVIL) --- */
 @media (max-width: 850px) {
-  /* Forzamos que el contenedor no tenga scroll interno, que lo maneje el celular */
+  body {
+    overflow: auto; /* Liberamos el scroll del cuerpo para móviles */
+  }
+
   .app-wrapper {
-    height: auto;
-    overflow: auto;
+    height: auto; /* Safari necesita altura automática para scrollear */
+    overflow: visible;
   }
 
   .dashboard-main {
     display: flex;
     flex-direction: column; 
     height: auto;
-    overflow-y: visible;
+    overflow: visible;
     padding: 10px;
-    gap: 15px; /* Espacio uniforme entre secciones */
+    gap: 15px;
   }
 
   .sidebar {
     width: 100% !important;
-    max-width: none;
-    position: static;
-    margin-bottom: 0; /* Controlado por el gap del dashboard */
-  }
-
-  /* Ajuste para que los inputs del formulario sean fáciles de tocar */
-  .sidebar input, .sidebar select, .sidebar button {
-    font-size: 16px !important; /* Evita que iOS haga zoom automático al enfocar */
-    padding: 12px !important;
-    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
   }
 
   .right-panel {
-    width: 100%;
     height: auto;
-    display: flex;
-    flex-direction: column;
+    overflow: visible;
   }
 
   .map-container-wrapper {
-    height: 400px; /* Un poco más alto para que sea usable con el dedo */
-    border-radius: 8px;
-    z-index: 1; /* Evita que se superponga a menús */
+    height: 450px; /* Altura fija suficiente para manejar el mapa con el dedo */
+    margin-bottom: 15px;
   }
 
-  /* El historial debe tener su propio scroll lateral obligatorio */
   .history-section {
-    width: 100%;
-    overflow-x: hidden; /* Evitamos que toda la web baile */
-  }
-
-  .history-section h3 {
-    font-size: 1rem;
-    margin-bottom: 10px;
+    height: auto;
+    max-height: 500px;
+    padding: 15px;
   }
 
   .top-nav {
+    padding: 0 1rem;
+    height: auto;
+    min-height: 60px;
     flex-direction: column;
+    justify-content: center;
     text-align: center;
-    padding: 10px;
-  }
-
-  .top-nav h1 {
-    font-size: 1.1rem;
-    margin-bottom: 5px;
   }
 }
