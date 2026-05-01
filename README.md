@@ -1,87 +1,231 @@
-Satipo FireGuard AI 🛰️🔥  
-Sistema Inteligente de Predicción de Riesgos de Incendios Forestales  
+# Satipo FireGuard AI 🛰️🔥
 
-Satipo FireGuard AI es una plataforma web geoespacial diseñada para el monitoreo y predicción de riesgos de incendios forestales en la provincia de Satipo, Perú. Utiliza Inteligencia Artificial y datos satelitales simulados para evaluar factores ambientales críticos y visualizar zonas de peligro en tiempo real.
+Sistema Inteligente de Predicción de Riesgos de Incendios Forestales en la provincia de Satipo, Perú. Utiliza Inteligencia Artificial (Random Forest) y datos geoespaciales para evaluar factores ambientales críticos y visualizar zonas de peligro en tiempo real.
 
-📂 Estructura del Proyecto  
-El proyecto está dividido en una arquitectura de microservicios desacoplados:
+---
 
-risk_app/  
-├── backend/                # Lógica de IA y API (Python + FastAPI)  
-│   ├── main.py             # Entry point del servidor  
-│   ├── database.py         # Configuración de SQLAlchemy y PostGIS  
-│   ├── models.py           # Modelos de base de datos  
-│   ├── schemas.py          # Validaciones de Pydantic  
-│   ├── ml_logic/           # Modelos de Machine Learning (Scikit-learn)  
-│   └── requirements.txt    # Dependencias de Python  
-├── frontend/               # Interfaz de Usuario (React + Vite)  
-│   ├── src/  
-│   │   ├── components/     # Componentes (Mapa, Formulario, Tablas)  
-│   │   ├── services/       # Lógica de conexión con API (apiService.js)  
-│   │   ├── App.jsx         # Componente principal  
-│   │   └── index.css       # Estilos globales del Dashboard  
-│   ├── package.json        # Dependencias de Node.js  
-│   └── vite.config.js      # Configuración de compilación  
-└── docker-compose.yml      # Orquestación de Base de Datos (PostgreSQL/PostGIS)
+## 📂 Estructura de Carpetas y Archivos
 
-🛠️ Tecnologías Utilizadas  
+```
+risk_app/
+├── README.md                         # Documentación del proyecto
+├── docker-compose.yml                # Configuración Docker (PostgreSQL + PostGIS)
+├── .env                              # Variables de entorno
+├── .gitignore                        # Archivos ignorados por Git
+├── install.bat                       # Script de instalación (Windows)
+├── iniciar.bat                       # Script para iniciar la aplicación
+├── ejecutar_todo.bat                 # Script para ejecutar todo
+│
+├── backend/                          # API REST (Python/FastAPI)
+│   ├── main.py                       # Punto de entrada FastAPI
+│   ├── database.py                   # Configuración SQLAlchemy + PostGIS
+│   ├── models.py                     # Modelos ORM
+│   ├── schemas.py                    # Validaciones Pydantic
+│   ├── ml_model.py                   # Lógica de modelos ML
+│   ├── requirements.txt               # Dependencias Python
+│   ├── rf_satipo_model.pkl           # Modelo Random Forest
+│   ├── risk_model.pkl                # Modelo de predicción
+│   │
+│   ├── application/
+│   │   └── use_cases.py              # Casos de uso del negocio
+│   │
+│   ├── domain/
+│   │   ├── entities.py               # Entidades del dominio
+│   │   └── ports/
+│   │       └── ml_service.py         # Puerto/Interfaz ML
+│   │
+│   └── infrastructure/
+│       └── adapters/
+│           └── rf_adapter.py         # Adaptador Random Forest
+│
+├── frontend/                         # Interfaz Web (React + Vite)
+│   ├── package.json                  # Dependencias npm
+│   ├── vite.config.js                # Config Vite
+│   ├── eslint.config.js              # Config ESLint
+│   ├── index.html                    # HTML principal
+│   ├── vercel.json                   # Config Vercel
+│   │
+│   └── src/
+│       ├── main.jsx                  # Entry point React
+│       ├── App.jsx                   # Componente principal
+│       ├── App.css                   # Estilos
+│       ├── index.css                 # Estilos globales
+│       │
+│       ├── components/               # Componentes React
+│       │   ├── RiskForm.jsx          # Formulario de datos
+│       │   ├── MapPanel.jsx          # Mapa interactivo
+│       │   ├── ResultCard.jsx        # Tarjeta de resultados
+│       │   └── HistoryTable.jsx      # Tabla de historial
+│       │
+│       ├── services/
+│       │   └── apiService.js         # Cliente HTTP para API
+│       │
+│       ├── utils/
+│       │   └── pdfGenerator.js       # Generador de reportes PDF
+│       │
+│       ├── assets/                   # Imágenes e iconos
+│       └── public/                   # Recursos estáticos
+│
+└── ml/                               # Carpeta para experimentos ML (vacía)
+```
 
-Frontend: React 18, Vite, Leaflet (Mapas), CSS Grid/Flexbox.  
+---
 
-Backend: Python 3.x, FastAPI, SQLAlchemy.  
+## 🛠️ Tecnologías Utilizadas
 
-Base de Datos: PostgreSQL 15 + Extensión PostGIS.  
+**Frontend:**
+- React 18+
+- Vite 5+
+- Leaflet 1.9+ (mapas interactivos)
 
-Machine Learning: Scikit-learn (Random Forest / Logistic Regression).  
+**Backend:**
+- Python 3.8+
+- FastAPI 0.100+
+- SQLAlchemy 2.0+
+- Pydantic 2.0+
 
-🚀 Instalación y Configuración  
+**Base de Datos:**
+- PostgreSQL 15+
+- PostGIS 3.0+ (geoespacial)
 
-1. Clonar el repositorio e ingresar  
+**Machine Learning:**
+- Scikit-learn 1.0+ (Random Forest)
+- NumPy 1.20+
+- Pandas 1.3+
 
-git clone https://github.com/tu-usuario/risk_app.git  
-cd risk_app  
+**DevOps:**
+- Docker 20.10+
+- Docker Compose 2.0+
 
-2. Levantar la Base de Datos (Docker)  
+---
 
-Asegúrate de tener Docker instalado y ejecuta:  
+## 🏗️ Arquitectura Hexagonal (Clean Architecture)
 
-docker-compose up -d  
+```
+┌────────────────────────────────────────────────────────┐
+│          EXTERNAL INTERFACE (React UI)                 │
+└────────────────────┬─────────────────────────────────┘
+                     │ REST API
+┌────────────────────────────────────────────────────────┐
+│            ADAPTERS & CONTROLLERS (FastAPI)            │
+│  (Convierten HTTP requests a casos de uso)             │
+└────────────────┬───────────────────────────┬──────────┘
+                 │                           │
+        ┌────────▼─────────┐      ┌──────────▼───────┐
+        │ APPLICATION      │      │ INFRASTRUCTURE   │
+        │ LAYER            │      │ LAYER            │
+        │                  │      │                  │
+        │ use_cases.py     │      │ adapters/        │
+        │ (Lógica negocio) │      │ database.py      │
+        └────────┬─────────┘      │ rf_adapter.py    │
+                 │                │                  │
+        ┌────────────────────┐    └──────────┬───────┘
+        │  DOMAIN LAYER      │               │
+        │  (Núcleo)          │               │
+        │                    │               │
+        │ entities.py        │               │
+        │ ports/ml_service   │               │
+        └────────┬───────────┘               │
+                 │                           │
+                 └───────────┬───────────────┘
+                             │
+                    ┌────────▼────────┐
+                    │ DATABASES       │
+                    │ PostgreSQL+     │
+                    │ PostGIS         │
+                    │ (ML Models)     │
+                    └─────────────────┘
+```
 
-3. Configurar el Backend (Python)  
+**Capas:**
+1. **Domain**: Entidades y puertos (independientes de frameworks)
+2. **Application**: Casos de uso del negocio
+3. **Infrastructure**: Adaptadores, BD, servicios externos
+4. **Presentation**: UI (React) y API (FastAPI)
 
-cd backend  
-python -m venv venv  
+---
 
-# Activar venv:  
-# Windows: venv\Scripts\activate | Linux/Mac: source venv/bin/activate  
+## ⚙️ Requisitos Previos
 
-pip install -r requirements.txt  
-uvicorn main:app --reload --port 8000  
+- **Python 3.8+** - [Descargar](https://www.python.org/downloads/)
+- **Node.js 16+** - [Descargar](https://nodejs.org/)
+- **Git** - [Descargar](https://git-scm.com/)
+- **Docker Desktop** - [Descargar](https://www.docker.com/products/docker-desktop)
 
-4. Configurar el Frontend (Node.js)  
+**Verificar instalación:**
+```bash
+python --version
+node --version
+npm --version
+git --version
+docker --version
+docker-compose --version
+```
 
-cd ../frontend  
-npm install  
-npm run dev  
+---
 
-🖥️ Funcionalidades Clave  
+## 🚀 Instalación Local
 
-Monitoreo Geoespacial: Mapa interactivo basado en OpenStreetMap centrado en Satipo.  
+### 1. Clonar repositorio
+```bash
+git clone https://github.com/tu-usuario/risk_app.git
+cd risk_app
+```
 
-Captura de Datos Automática: Al hacer clic en cualquier punto del mapa, el sistema simula la captura de variables ambientales (Temp, Humedad, NDVI, Pendiente).  
+### 2. Levantar base de datos
+```bash
+docker-compose up -d
+```
 
-Evaluación de Riesgo: Motor de IA que clasifica el nivel de riesgo en: Bajo (Verde), Medio (Naranja) y Alto (Rojo).  
+### 3. Configurar backend
+```bash
+cd backend
 
-Historial y Mapas de Calor: Visualización de registros previos mediante Marcadores Circulares coloreados según el nivel de riesgo reportado.  
+# Crear entorno virtual
+python -m venv venv
 
-Arquitectura Escalable: Preparado para integración real con APIs de OpenWeather o Google Earth Engine.  
+# Activar (Windows):
+venv\Scripts\activate
 
-🧑‍💻 Autor  
+# Instalar dependencias
+pip install -r requirements.txt
 
-Desarrollado para Tesis de Ingeniería - Satipo, Perú.  
+# Ejecutar servidor
+uvicorn main:app --reload --port 8000
+```
 
-Enfoque: Prevención de desastres naturales y conservación forestal mediante IA.  
+API en: `http://localhost:8000`
+Docs: `http://localhost:8000/docs`
 
-🧠 Nota para el Desarrollador (MVP)  
+### 4. Configurar frontend
+```bash
+cd ../frontend
 
-El sistema se encuentra en fase de MVP (Minimum Viable Product). La lógica de IA utiliza actualmente un modelo entrenado con datos históricos locales. Para producción, se recomienda la conexión directa a servicios satelitales de la zona.
+# Instalar dependencias
+npm install
+
+# Iniciar servidor
+npm run dev
+```
+
+Aplicación en: `http://localhost:5173`
+
+### 5. Verificar que funciona
+- Frontend: `http://localhost:5173`
+- Backend API: `http://localhost:8000/docs`
+- Base de datos: `localhost:5432`
+
+---
+
+## 📝 Variables de Entorno (.env)
+
+```env
+DATABASE_URL=postgresql://postgres:password@localhost:5432/risk_db
+API_PORT=8000
+DEBUG=True
+VITE_API_URL=http://localhost:8000
+```
+
+---
+
+**Última actualización:** Abril 2026 | **Versión:** 1.0.0 (MVP)

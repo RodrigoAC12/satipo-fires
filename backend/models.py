@@ -13,6 +13,7 @@ class RiskAssessment(Base):
     ndvi = Column(Float, nullable=False, default=0.0)
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
+    accuracy = Column(Float, default=0.0)
     
     risk_level = Column(String, nullable=False)
     color = Column(String, nullable=False)

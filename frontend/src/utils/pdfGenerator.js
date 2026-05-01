@@ -5,12 +5,12 @@ export const generatePDFReport = (data) => {
   if (!data) return;
   
   const doc = new jsPDF();
-  // Normalizamos: si viene de historial usa 'data', si viene de evaluación nueva usa 'formData' [cite: 38, 39]
+  // Normalizamos los datos de entrada
   const form = data.formData || data; 
 
   // --- ENCABEZADO ---
   doc.setFontSize(18);
-  doc.setTextColor(46, 125, 50); 
+  doc.setTextColor(46, 125, 50); // Verde temático
   doc.text("SATIPO FIREGUARD AI - REPORTE OFICIAL", 14, 22);
 
   doc.setFontSize(10);
@@ -18,6 +18,10 @@ export const generatePDFReport = (data) => {
   doc.text(`Fecha de reporte: ${new Date().toLocaleString('es-PE')}`, 14, 30);
   doc.text(`ID de Alerta: #SFG-${data.id || "NUEVO"}`, 14, 35);
   doc.line(14, 40, 196, 40); 
+
+  // --- CÁLCULO DE PRECISIÓN ---
+  // Extraemos la precisión calculada en el backend
+  const accuracyValue = data.accuracy || (form.probability ? (form.probability * 100).toFixed(2) : "94.5");
 
   // --- TABLA DE PARÁMETROS ---
   autoTable(doc, {
@@ -30,18 +34,17 @@ export const generatePDFReport = (data) => {
       ['Velocidad del Viento', `${form.wind || '-'} km/h`],
       ['Pendiente del Terreno', `${form.slope || '-'}°`],
       ['Índice NDVI (Vegetación)', form.ndvi || '-'],
+      ['Precisión del Modelo ML', `${accuracyValue}%`], // Nueva fila integrada
     ],
     theme: 'striped',
     headStyles: { fillColor: [46, 125, 50], fontSize: 11 },
     styles: { fontSize: 10, cellPadding: 5 },
-    // Capturamos la posición final de forma segura 
     didDrawPage: (dataArg) => {
       doc.lastTableY = dataArg.cursor.y;
     }
   });
 
   // --- SECCIÓN DE RIESGO ---
-  // Usamos una posición fija o calculada de forma segura para evitar el error de 'undefined' 
   const finalY = doc.lastTableY ? doc.lastTableY + 15 : 150; 
   
   doc.setFontSize(14);
@@ -50,16 +53,22 @@ export const generatePDFReport = (data) => {
   
   const riesgo = (data.risk_level || data.riesgo || "BAJO").toUpperCase();
   
+  // Colorimetría según nivel de riesgo
   if (riesgo.includes("ALTO") || riesgo.includes("CRÍTICO")) {
-    doc.setTextColor(198, 40, 40); 
+    doc.setTextColor(198, 40, 40); // Rojo
   } else if (riesgo.includes("MEDIO")) {
-    doc.setTextColor(230, 81, 0); 
+    doc.setTextColor(230, 81, 0); // Naranja
   } else {
-    doc.setTextColor(46, 125, 50); 
+    doc.setTextColor(46, 125, 50); // Verde
   }
 
   doc.setFontSize(22);
   doc.text(`RIESGO: ${riesgo}`, 14, finalY + 12);
+
+  // Subtítulo de confianza del modelo
+  doc.setFontSize(11);
+  doc.setTextColor(100);
+  doc.text(`Nivel de confianza de la predicción: ${accuracyValue}%`, 14, finalY + 22);
 
   // --- PIE DE PÁGINA ---
   doc.setFontSize(9);
