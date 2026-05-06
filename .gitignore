@@ -1,10 +1,13 @@
-pycache/
+__pycache__/
 *.py[cod]
-*$py.class
 venv/
+backend/venv/
 .env
+.env.local
+.env.production
+node_modules/
+dist/
+.vscode/
 .DS_Store
 Thumbs.db
-.git/
-.vscode/
 *.pkl

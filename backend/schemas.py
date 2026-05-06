@@ -1,8 +1,20 @@
-from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional
+
+from pydantic import BaseModel, ConfigDict, Field
+
 
 class PredictionRequest(BaseModel):
+    temperature: float = Field(..., ge=0, le=60)
+    humidity: float = Field(..., ge=0, le=100)
+    wind: float = Field(..., ge=0, le=150)
+    slope: float = Field(..., ge=0, le=90)
+    ndvi: float = Field(..., ge=-1, le=1)
+    latitude: float = Field(..., ge=-90, le=90)
+    longitude: float = Field(..., ge=-180, le=180)
+
+
+class PredictionResponse(BaseModel):
+    id: int
     temperature: float
     humidity: float
     wind: float
@@ -10,20 +22,9 @@ class PredictionRequest(BaseModel):
     ndvi: float
     latitude: float
     longitude: float
-
-class PredictionResponse(BaseModel):
-    id: int
-    temperature: float
-    humidity: float
-    wind: float
-    slope: float      # <--- CRÍTICO: Debe estar aquí
-    ndvi: float       # <--- CRÍTICO: Debe estar aquí
-    latitude: float
-    longitude: float
     risk_level: str
     color: str
-    probability: float
+    probability: float = Field(..., ge=0, le=100)
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

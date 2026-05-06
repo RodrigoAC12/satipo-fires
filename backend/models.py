@@ -1,9 +1,15 @@
-from sqlalchemy import Column, Integer, Float, String, DateTime
 from datetime import datetime
+
+from sqlalchemy import CheckConstraint, Column, DateTime, Float, Integer, String
+
 from database import Base
+
 
 class RiskAssessment(Base):
     __tablename__ = "risk_assessments"
+    __table_args__ = (
+        CheckConstraint("probability >= 0 AND probability <= 100", name="ck_risk_assessments_probability_percent"),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
     temperature = Column(Float, nullable=False)
@@ -13,10 +19,9 @@ class RiskAssessment(Base):
     ndvi = Column(Float, nullable=False, default=0.0)
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
-    accuracy = Column(Float, default=0.0)
-    
+
     risk_level = Column(String, nullable=False)
     color = Column(String, nullable=False)
     probability = Column(Float, nullable=False)
-    
-    created_at = Column(DateTime, default=datetime.utcnow)
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
