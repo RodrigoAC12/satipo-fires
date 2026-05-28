@@ -1,109 +1,137 @@
+import { useMemo } from 'react';
+import { CalendarDays, Droplets, FileText, Gauge, MapPin, Mountain, Thermometer, Wind } from 'lucide-react';
+
 const formatPercent = (value) => {
   const numericValue = Number(value);
-  return Number.isFinite(numericValue) ? numericValue.toFixed(2) : '-';
+  return Number.isFinite(numericValue) ? numericValue.toFixed(1) : '-';
+};
+
+const formatNumber = (value, decimals = 1) => {
+  const numericValue = Number(value);
+  return Number.isFinite(numericValue) ? numericValue.toFixed(decimals) : '-';
 };
 
 const normalizeRisk = (risk) => String(risk).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
-const HistoryTable = ({ history, onRowClick, onDownloadPDF }) => {
-  const formatDateTime = (dateString) => {
-    if (!dateString) return { date: '-', time: '-' };
-    const d = new Date(dateString);
-    return {
-      date: d.toLocaleDateString('es-PE'),
-      time: d.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }),
-    };
-  };
+const getRiskMeta = (risk) => {
+  const normalized = normalizeRisk(risk);
+  if (normalized.includes('bajo')) return { label: 'Bajo', className: 'risk-bajo' };
+  if (normalized.includes('medio')) return { label: 'Medio', className: 'risk-medio' };
+  if (normalized.includes('alto')) return { label: 'Alto', className: 'risk-alto' };
+  if (normalized.includes('critico')) return { label: 'Critico', className: 'risk-critico' };
+  return { label: risk || 'N/A', className: 'risk-neutral' };
+};
 
-  const getRiskColor = (risk) => {
-    if (!risk) return 'inherit';
-    const r = normalizeRisk(risk);
-    if (r.includes('bajo')) return '#2e7d32';
-    if (r.includes('medio')) return '#e65100';
-    if (r.includes('alto') || r.includes('critico')) return '#c62828';
-    return 'inherit';
+const formatDateTime = (dateString) => {
+  if (!dateString) return { date: '-', time: '-' };
+  const d = new Date(dateString);
+  if (Number.isNaN(d.getTime())) return { date: '-', time: '-' };
+  return {
+    date: d.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' }),
+    time: d.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }),
   };
+};
+
+const clampPercent = (value) => {
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) return 0;
+  return Math.min(100, Math.max(0, numericValue));
+};
+
+const HistoryTable = ({ history, onRowClick, onDownloadPDF }) => {
+  const sortedHistory = useMemo(
+    () => [...(history || [])].sort((a, b) => new Date(b.created_at || b.fecha || 0) - new Date(a.created_at || a.fecha || 0)),
+    [history],
+  );
 
   return (
-    <div style={{
-      width: '100%',
-      overflowX: 'auto',
-      overflowY: 'auto',
-      maxHeight: '400px',
-      border: '1px solid #ddd',
-      borderRadius: '8px',
-      backgroundColor: '#fff',
-      WebkitOverflowScrolling: 'touch',
-    }}>
-      <table style={{
-        width: '100%',
-        minWidth: '1000px',
-        borderCollapse: 'collapse',
-        fontSize: '0.85rem',
-        whiteSpace: 'nowrap',
-      }}>
-        <thead style={{
-          position: 'sticky',
-          top: 0,
-          backgroundColor: '#f1f8e9',
-          zIndex: 10,
-          boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-        }}>
-          <tr style={{ textAlign: 'left' }}>
-            <th style={{ padding: '12px 10px' }}>Fecha</th>
-            <th style={{ padding: '12px 10px' }}>Hora</th>
-            <th style={{ padding: '12px 10px' }}>Coordenadas</th>
-            <th style={{ padding: '12px 10px' }}>Riesgo</th>
-            <th style={{ padding: '12px 10px' }}>Precision ML</th>
-            <th style={{ padding: '12px 10px' }}>Temp</th>
-            <th style={{ padding: '12px 10px' }}>Hum</th>
-            <th style={{ padding: '12px 10px' }}>Viento</th>
-            <th style={{ padding: '12px 10px', textAlign: 'center' }}>Acciones</th>
+    <div className="table-scroll">
+      <table className="history-table">
+        <thead>
+          <tr>
+            <th>Registro</th>
+            <th>Riesgo</th>
+            <th>Ubicacion</th>
+            <th>Ambiente</th>
+            <th>Terreno</th>
+            <th>Precision</th>
+            <th>Accion</th>
           </tr>
         </thead>
         <tbody>
-          {history && history.length > 0 ? (
-            history.map((item, idx) => {
+          {sortedHistory.length > 0 ? (
+            sortedHistory.map((item, idx) => {
               const { date, time } = formatDateTime(item.created_at || item.fecha);
               const risk = item.risk_level || item.riesgo || 'N/A';
-              const probability = formatPercent(item.probability);
+              const riskMeta = getRiskMeta(risk);
+              const probability = item.probability ?? item.probabilidad ?? item.accuracy;
+              const probabilityLabel = formatPercent(probability);
+              const probabilityWidth = clampPercent(probability);
+              const rowId = item.id ? `#${item.id}` : `#${idx + 1}`;
 
               return (
                 <tr
-                  key={item.id || idx}
-                  onClick={() => onRowClick(item)}
-                  style={{ cursor: 'pointer', borderBottom: '1px solid #eee' }}
+                  key={item.id || `${item.created_at}-${idx}`}
+                  onClick={() => onRowClick?.(item)}
                 >
-                  <td style={{ padding: '12px 10px' }}>{date}</td>
-                  <td style={{ padding: '12px 10px' }}>{time}</td>
-                  <td style={{ padding: '12px 10px', fontSize: '0.75rem' }}>
-                    {item.latitude?.toFixed(4)}, {item.longitude?.toFixed(4)}
+                  <td>
+                    <span className="cell-main">{rowId}</span>
+                    <span className="cell-sub">
+                      <CalendarDays size={13} /> {date} - {time}
+                    </span>
                   </td>
-                  <td style={{ padding: '12px 10px', fontWeight: 'bold', color: getRiskColor(risk) }}>
-                    {risk.toUpperCase()}
+                  <td>
+                    <span className={`risk-badge ${riskMeta.className}`}>{riskMeta.label}</span>
                   </td>
-                  <td style={{ padding: '12px 10px', fontWeight: 'bold', color: '#1b5e20' }}>
-                    {probability === '-' ? '-' : `${probability}%`}
+                  <td>
+                    <span className="cell-main">
+                      <MapPin size={14} /> {formatNumber(item.latitude, 4)}, {formatNumber(item.longitude, 4)}
+                    </span>
+                    <span className="cell-sub">Coordenadas WGS84</span>
                   </td>
-                  <td style={{ padding: '12px 10px' }}>{item.temperature ?? '-'} C</td>
-                  <td style={{ padding: '12px 10px' }}>{item.humidity ?? '-'}%</td>
-                  <td style={{ padding: '12px 10px' }}>{item.wind ?? '-'} km/h</td>
-                  <td style={{ padding: '8px', textAlign: 'center' }}>
+                  <td>
+                    <div className="data-stack">
+                      <span className="data-row">
+                        <Thermometer size={14} /> {formatNumber(item.temperature)} C
+                      </span>
+                      <span className="data-row">
+                        <Droplets size={14} /> {formatNumber(item.humidity)}%
+                      </span>
+                      <span className="data-row">
+                        <Wind size={14} /> {formatNumber(item.wind)} km/h
+                      </span>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="data-stack">
+                      <span className="data-row">
+                        <Mountain size={14} /> {formatNumber(item.slope)} grados
+                      </span>
+                      <span className="data-row">
+                        <Gauge size={14} /> NDVI {formatNumber(item.ndvi, 2)}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="precision-cell">
+                    <div className="precision-head">
+                      <span className="cell-main">Modelo ML</span>
+                      <span className="precision-value">{probabilityLabel === '-' ? '-' : `${probabilityLabel}%`}</span>
+                    </div>
+                    <div className="precision-track" aria-hidden="true">
+                      <div className="precision-fill" style={{ width: `${probabilityWidth}%` }} />
+                    </div>
+                  </td>
+                  <td>
                     <button
+                      type="button"
+                      className="icon-btn"
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (onDownloadPDF) onDownloadPDF(item);
+                        onDownloadPDF?.(item);
                       }}
-                      style={{
-                        padding: '6px 12px',
-                        backgroundColor: '#fff',
-                        border: '1px solid #2e7d32',
-                        borderRadius: '4px',
-                        color: '#2e7d32',
-                        fontWeight: '600',
-                        cursor: 'pointer',
-                      }}
+                      title="Generar PDF"
                     >
+                      <FileText size={15} />
                       PDF
                     </button>
                   </td>
@@ -112,8 +140,8 @@ const HistoryTable = ({ history, onRowClick, onDownloadPDF }) => {
             })
           ) : (
             <tr>
-              <td colSpan="9" style={{ textAlign: 'center', padding: '20px' }}>
-                Cargando registros...
+              <td colSpan="7" className="empty-state">
+                No hay registros disponibles.
               </td>
             </tr>
           )}

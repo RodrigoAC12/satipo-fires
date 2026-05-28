@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Activity, Database, MapPinned, Server, ShieldCheck } from 'lucide-react';
 import RiskForm from './components/RiskForm';
 import ResultCard from './components/ResultCard';
 import MapPanel from './components/MapPanel';
@@ -93,11 +94,39 @@ function App() {
     generatePDFReport(formattedData);
   };
 
+  const sortedHistory = useMemo(
+    () => [...history].sort((a, b) => new Date(b.created_at || b.fecha || 0) - new Date(a.created_at || a.fecha || 0)),
+    [history],
+  );
+  const latestAssessment = sortedHistory[0];
+  const latestRisk = latestAssessment?.risk_level || latestAssessment?.riesgo || 'Sin registros';
+
   return (
     <div className="app-wrapper">
       <nav className="top-nav">
-        <h1>SATIPO FIREGUARD AI</h1>
-        <div style={{ fontSize: '0.9rem' }}>Sistema Operativo - Satipo, Peru</div>
+        <div className="app-brand">
+          <span className="brand-mark" aria-hidden="true">
+            <ShieldCheck size={22} />
+          </span>
+          <div className="brand-copy">
+            <h1>Satipo FireGuard AI</h1>
+            <p>Monitoreo operativo de riesgo forestal</p>
+          </div>
+        </div>
+        <div className="top-status">
+          <span className="status-pill">
+            <Server size={15} />
+            API Render
+          </span>
+          <span className="status-pill">
+            <Database size={15} />
+            Supabase
+          </span>
+          <span className="status-pill is-neutral">
+            <Activity size={15} />
+            {sortedHistory.length} registros
+          </span>
+        </div>
       </nav>
 
       <div className="dashboard-main">
@@ -107,23 +136,46 @@ function App() {
         </aside>
 
         <main className="right-panel">
-          <div className="map-container-wrapper">
-            <MapPanel
-              history={history}
-              onMapClick={handleMapClick}
-              targetCenter={targetMapCenter}
-              selectedData={autoFormData}
-            />
-          </div>
+          <section className="panel map-card">
+            <div className="panel-header">
+              <div>
+                <h2 className="panel-title">Mapa de vigilancia</h2>
+                <p className="panel-kicker">Satipo, Junin - Peru</p>
+              </div>
+              <span className="metric-chip">
+                <MapPinned size={15} />
+                Riesgo actual: {latestRisk}
+              </span>
+            </div>
+            <div className="map-container-wrapper">
+              <MapPanel
+                history={sortedHistory}
+                onMapClick={handleMapClick}
+                targetCenter={targetMapCenter}
+                selectedData={autoFormData}
+              />
+            </div>
+          </section>
 
-          <div className="history-section">
-            <h3 style={{ marginTop: 0, color: '#1b5e20', fontSize: '1.1rem' }}>Historial de Monitoreo</h3>
+          <section className="panel history-section">
+            <div className="panel-header">
+              <div>
+                <h2 className="panel-title">Historial de monitoreo</h2>
+                <p className="panel-kicker">Registros ordenados del mas reciente al mas antiguo</p>
+              </div>
+              <div className="history-meta">
+                <span className="metric-chip">
+                  <Activity size={15} />
+                  {sortedHistory.length} evaluaciones
+                </span>
+              </div>
+            </div>
             <HistoryTable
-              history={history}
+              history={sortedHistory}
               onRowClick={handleHistoryRowClick}
               onDownloadPDF={handleDownloadPDF}
             />
-          </div>
+          </section>
         </main>
       </div>
     </div>

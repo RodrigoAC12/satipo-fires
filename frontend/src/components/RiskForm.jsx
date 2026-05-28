@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react';
+import { Activity } from 'lucide-react';
 
 const FIELD_CONFIG = {
-  latitude: { label: 'Latitud', step: '0.000001', min: -90, max: 90 },
-  longitude: { label: 'Longitud', step: '0.000001', min: -180, max: 180 },
-  temperature: { label: 'Temperatura (C)', step: '0.1', min: 0, max: 60 },
-  humidity: { label: 'Humedad (%)', step: '0.1', min: 0, max: 100 },
-  wind: { label: 'Viento (km/h)', step: '0.1', min: 0, max: 150 },
-  slope: { label: 'Pendiente (grados)', step: '0.1', min: 0, max: 90 },
-  ndvi: { label: 'Indice de Vegetacion (NDVI)', step: '0.01', min: -1, max: 1 },
+  latitude: { label: 'Latitud', step: '0.000001', min: -90, max: 90, unit: 'lat' },
+  longitude: { label: 'Longitud', step: '0.000001', min: -180, max: 180, unit: 'lon' },
+  temperature: { label: 'Temperatura', step: '0.1', min: 0, max: 60, unit: 'C' },
+  humidity: { label: 'Humedad', step: '0.1', min: 0, max: 100, unit: '%' },
+  wind: { label: 'Viento', step: '0.1', min: 0, max: 150, unit: 'km/h' },
+  slope: { label: 'Pendiente', step: '0.1', min: 0, max: 90, unit: 'grados' },
+  ndvi: { label: 'NDVI', step: '0.01', min: -1, max: 1, unit: 'indice' },
 };
 
 const FIELD_NAMES = Object.keys(FIELD_CONFIG);
@@ -84,34 +85,42 @@ export default function RiskForm({ onEvaluate, loading, initialData }) {
 
   return (
     <div className="card">
-      <h2>Parametros Ambientales (Satipo)</h2>
-      <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+      <div className="card-header">
+        <div>
+          <h2 className="card-title">Parametros ambientales</h2>
+          <p className="card-kicker">Satipo - medicion puntual</p>
+        </div>
+      </div>
+      <form onSubmit={handleSubmit} className="form-grid">
         {FIELD_LAYOUT.flatMap((row) => row.map((fieldName) => {
           const field = FIELD_CONFIG[fieldName];
           return (
             <div
-              className="form-group"
+              className={`form-group${row.length === 1 ? ' is-wide' : ''}`}
               key={fieldName}
-              style={row.length === 1 ? { gridColumn: '1 / -1' } : undefined}
             >
               <label>{field.label}</label>
-              <input
-                type="number"
-                step={field.step}
-                min={field.min}
-                max={field.max}
-                name={fieldName}
-                value={formData[fieldName]}
-                onChange={handleChange}
-                required
-              />
+              <div className="input-shell">
+                <input
+                  type="number"
+                  step={field.step}
+                  min={field.min}
+                  max={field.max}
+                  name={fieldName}
+                  value={formData[fieldName]}
+                  onChange={handleChange}
+                  required
+                />
+                <span className="input-unit">{field.unit}</span>
+              </div>
             </div>
           );
         }))}
 
-        <div style={{ gridColumn: '1 / -1' }}>
+        <div className="form-actions">
           <button type="submit" className="btn" disabled={loading}>
-            {loading ? 'Evaluando...' : 'Evaluar Riesgo'}
+            <Activity size={17} />
+            {loading ? 'Evaluando' : 'Evaluar riesgo'}
           </button>
         </div>
       </form>
