@@ -1,4 +1,3 @@
-import React from 'react';
 import GaugeComponent from 'react-gauge-component';
 
 const normalizeRisk = (risk) => String(risk).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();

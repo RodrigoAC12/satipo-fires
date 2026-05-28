@@ -1,18 +1,25 @@
+const round = (value, decimals) => Number(value.toFixed(decimals));
+
+const coordinateNoise = (lat, lon, salt) => {
+    const raw = Math.sin((lat * 12.9898) + (lon * 78.233) + salt) * 43758.5453;
+    return raw - Math.floor(raw);
+};
+
 export const fetchEnvironmentalData = async (lat, lon) => {
-    try {
-        const mockData = {
-            temperature: (22 + Math.random() * 13).toFixed(1),
-            humidity: (55 + Math.random() * 35).toFixed(1),
-            wind: (3 + Math.random() * 22).toFixed(1),
-            slope: (Math.random() * 45).toFixed(1),
-            ndvi: (0.3 + Math.random() * 0.6).toFixed(2),
-            latitude: parseFloat(lat.toFixed(6)),
-            longitude: parseFloat(lon.toFixed(6))
-        };
-        console.log("📍 Datos generados para Satipo:", mockData);
-        return mockData;
-    } catch (error) {
-        console.error("❌ Error en apiService:", error);
-        return null;
+    const latitude = Number(lat);
+    const longitude = Number(lon);
+
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+        throw new Error('Coordenadas invalidas');
     }
+
+    return {
+        temperature: round(22 + coordinateNoise(latitude, longitude, 1) * 13, 1),
+        humidity: round(55 + coordinateNoise(latitude, longitude, 2) * 35, 1),
+        wind: round(3 + coordinateNoise(latitude, longitude, 3) * 22, 1),
+        slope: round(coordinateNoise(latitude, longitude, 4) * 45, 1),
+        ndvi: round(0.3 + coordinateNoise(latitude, longitude, 5) * 0.6, 2),
+        latitude: round(latitude, 6),
+        longitude: round(longitude, 6),
+    };
 };

@@ -25,6 +25,7 @@ class PredictionResponse(BaseModel):
     risk_level: str
     color: str
     probability: float = Field(..., ge=0, le=100)
+    accuracy: float = Field(..., ge=0, le=100)
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

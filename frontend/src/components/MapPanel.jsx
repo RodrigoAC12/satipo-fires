@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -25,40 +25,53 @@ function MapController({ targetCenter }) {
   return null;
 }
 
-const MapPanel = ({ history, onMapClick, targetCenter, selectedData }) => {
-  const defaultCenter = [-11.2522, -74.6383];
-  const [instantClickPos, setInstantClickPos] = useState(null);
+function MapInteraction({ onSelect }) {
+  useMapEvents({
+    click(e) {
+      onSelect({ lat: e.latlng.lat, lng: e.latlng.lng });
+    },
+  });
+  return null;
+}
 
-  // Sincronizar posición cuando se selecciona una fila del historial
-  useEffect(() => {
-    if (selectedData && (selectedData.latitude || selectedData.lat)) {
-      setInstantClickPos({
-        lat: selectedData.latitude ?? selectedData.lat,
-        lng: selectedData.longitude ?? selectedData.lng
-      });
-    }
-  }, [selectedData]);
+const getPositionFromData = (data) => {
+  const lat = Number(data?.latitude ?? data?.lat);
+  const lng = Number(data?.longitude ?? data?.lng);
 
-  // Manejador de clics en el mapa
-  function MapInteraction() {
-    useMapEvents({
-      click(e) {
-        // En móviles, esto permite poner el marcador con un toque
-        setInstantClickPos({ lat: e.latlng.lat, lng: e.latlng.lng });
-        if (onMapClick) onMapClick(e.latlng.lat, e.latlng.lng);
-      },
-    });
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
     return null;
   }
 
-  const getRiskColor = (risk) => {
-    if (!risk) return '#9e9e9e'; 
-    const r = risk.toLowerCase();
-    if (r.includes('bajo')) return '#4caf50'; 
-    if (r.includes('medio')) return '#ff9800'; 
-    if (r.includes('alto') || r.includes('crítico') || r.includes('critico')) return '#f44336'; 
-    return '#2196f3'; 
-  };
+  return { lat, lng };
+};
+
+const getPositionKey = (position) => (position ? `${position.lat}:${position.lng}` : '');
+
+const normalizeRisk = (risk) => String(risk).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+const getRiskColor = (risk) => {
+  if (!risk) return '#9e9e9e';
+  const r = normalizeRisk(risk);
+  if (r.includes('bajo')) return '#4caf50';
+  if (r.includes('medio')) return '#ff9800';
+  if (r.includes('alto') || r.includes('critico')) return '#f44336';
+  return '#2196f3';
+};
+
+const MapPanel = ({ history, onMapClick, targetCenter, selectedData }) => {
+  const defaultCenter = [-11.2522, -74.6383];
+  const selectedPosition = useMemo(() => getPositionFromData(selectedData), [selectedData]);
+  const selectedPositionKey = getPositionKey(selectedPosition);
+  const [clickState, setClickState] = useState({ selectedKey: '', position: null });
+
+  const instantClickPos = clickState.selectedKey === selectedPositionKey && clickState.position
+    ? clickState.position
+    : selectedPosition;
+
+  const handleMapSelect = useCallback((position) => {
+    setClickState({ selectedKey: selectedPositionKey, position });
+    if (onMapClick) onMapClick(position.lat, position.lng);
+  }, [onMapClick, selectedPositionKey]);
 
   return (
     <MapContainer 
@@ -72,7 +85,7 @@ const MapPanel = ({ history, onMapClick, targetCenter, selectedData }) => {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" 
       />
       
-      <MapInteraction />
+      <MapInteraction onSelect={handleMapSelect} />
       <MapController targetCenter={targetCenter} />
 
       {/* Marcador del punto actual seleccionado */}

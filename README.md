@@ -220,11 +220,20 @@ Aplicación en: `http://localhost:5173`
 ## 📝 Variables de Entorno (.env)
 
 ```env
-DATABASE_URL=postgresql://postgres:password@localhost:5432/risk_db
-API_PORT=8000
-DEBUG=True
-VITE_API_URL=http://localhost:8000
+DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require
+ALLOWED_ORIGINS=http://localhost:5173,https://satipo-fires.vercel.app
+ADMIN_KEY=replace_with_a_strong_admin_key
+AUTO_CREATE_TABLES=true
+VITE_API_URL=https://satipo-fires.onrender.com
 ```
+
+### Despliegue actual
+
+- **Frontend (Vercel):** configurar `VITE_API_URL` con la URL publica del backend en Render.
+- **Backend (Render):** configurar `DATABASE_URL`, `ALLOWED_ORIGINS`, `ADMIN_KEY` y `AUTO_CREATE_TABLES`.
+- **Base de datos (Supabase):** usar una URL PostgreSQL con `sslmode=require`.
+- `ALLOWED_ORIGINS` debe incluir el dominio final de Vercel; para desarrollo local puede conservar `http://localhost:5173`.
+- `ADMIN_KEY` protege el endpoint `DELETE /history/clear`. Si no se configura, el borrado queda deshabilitado.
 
 ---
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import RiskForm from './components/RiskForm';
 import ResultCard from './components/ResultCard';
 import MapPanel from './components/MapPanel';
@@ -7,7 +7,10 @@ import { fetchEnvironmentalData } from './services/apiService';
 import { generatePDFReport } from './utils/pdfGenerator';
 import './index.css';
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/+$/, '');
+const DEFAULT_API_BASE_URL = import.meta.env.PROD
+  ? 'https://satipo-fires.onrender.com'
+  : 'http://localhost:8000';
+const API_BASE_URL = (import.meta.env.VITE_API_URL || DEFAULT_API_BASE_URL).replace(/\/+$/, '');
 
 function App() {
   const [result, setResult] = useState(null);
@@ -16,7 +19,7 @@ function App() {
   const [autoFormData, setAutoFormData] = useState(null);
   const [targetMapCenter, setTargetMapCenter] = useState(null);
 
-  const fetchHistory = async () => {
+  const fetchHistory = useCallback(async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/history`);
       if (!res.ok) {
@@ -28,17 +31,25 @@ function App() {
     } catch (error) {
       console.error('Error cargando historial', error);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchHistory();
-  }, []);
+    // Initial history load comes from the backend; state updates happen after the request resolves.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void fetchHistory();
+  }, [fetchHistory]);
 
   const handleMapClick = async (lat, lon) => {
     setLoading(true);
-    const data = await fetchEnvironmentalData(lat, lon);
-    setAutoFormData(data);
-    setLoading(false);
+    try {
+      const data = await fetchEnvironmentalData(lat, lon);
+      setAutoFormData(data);
+    } catch (error) {
+      console.error('Error obteniendo datos ambientales', error);
+      alert('No se pudieron obtener datos ambientales para ese punto');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleEvaluate = async (formData) => {
@@ -50,7 +61,14 @@ function App() {
         body: JSON.stringify(formData),
       });
       if (!res.ok) {
-        throw new Error(`Error ${res.status} evaluando riesgo`);
+        let detail = `Error ${res.status} evaluando riesgo`;
+        try {
+          const errorData = await res.json();
+          detail = errorData.detail || detail;
+        } catch {
+          // El backend puede devolver una respuesta sin cuerpo JSON.
+        }
+        throw new Error(Array.isArray(detail) ? 'Hay campos fuera de rango' : detail);
       }
 
       const data = await res.json();
@@ -58,7 +76,7 @@ function App() {
       await fetchHistory();
     } catch (error) {
       console.error('Error conectando con el servidor', error);
-      alert('Error conectando con el servidor');
+      alert(error.message || 'Error conectando con el servidor');
     } finally {
       setLoading(false);
     }

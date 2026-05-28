@@ -1,5 +1,3 @@
-import React from 'react';
-
 const formatPercent = (value) => {
   const numericValue = Number(value);
   return Number.isFinite(numericValue) ? numericValue.toFixed(2) : '-';

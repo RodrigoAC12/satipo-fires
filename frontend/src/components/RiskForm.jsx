@@ -1,6 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 
-const FIELD_NAMES = ['temperature', 'humidity', 'wind', 'slope', 'ndvi', 'latitude', 'longitude'];
+const FIELD_CONFIG = {
+  latitude: { label: 'Latitud', step: '0.000001', min: -90, max: 90 },
+  longitude: { label: 'Longitud', step: '0.000001', min: -180, max: 180 },
+  temperature: { label: 'Temperatura (C)', step: '0.1', min: 0, max: 60 },
+  humidity: { label: 'Humedad (%)', step: '0.1', min: 0, max: 100 },
+  wind: { label: 'Viento (km/h)', step: '0.1', min: 0, max: 150 },
+  slope: { label: 'Pendiente (grados)', step: '0.1', min: 0, max: 90 },
+  ndvi: { label: 'Indice de Vegetacion (NDVI)', step: '0.01', min: -1, max: 1 },
+};
+
+const FIELD_NAMES = Object.keys(FIELD_CONFIG);
+const FIELD_LAYOUT = [
+  ['latitude', 'longitude'],
+  ['temperature', 'humidity'],
+  ['wind', 'slope'],
+  ['ndvi'],
+];
 
 const createEmptyForm = () => ({
   temperature: '',
@@ -18,17 +34,23 @@ const sanitizeFormData = (data = {}) => FIELD_NAMES.reduce((acc, key) => {
 }, createEmptyForm());
 
 export default function RiskForm({ onEvaluate, loading, initialData }) {
-  const [formData, setFormData] = useState(createEmptyForm);
+  const initialDataKey = useMemo(
+    () => FIELD_NAMES.map((key) => initialData?.[key] ?? '').join('|'),
+    [initialData],
+  );
+  const initialFormData = useMemo(() => sanitizeFormData(initialData), [initialData]);
+  const [draftState, setDraftState] = useState({ key: null, data: null });
 
-  useEffect(() => {
-    if (initialData) {
-      setFormData(sanitizeFormData(initialData));
-    }
-  }, [initialData]);
+  const formData = draftState.key === initialDataKey && draftState.data
+    ? draftState.data
+    : initialFormData;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setDraftState({
+      key: initialDataKey,
+      data: { ...formData, [name]: value },
+    });
   };
 
   const handleSubmit = (e) => {
@@ -42,9 +64,15 @@ export default function RiskForm({ onEvaluate, loading, initialData }) {
       return acc;
     }, {});
 
-    const hasInvalidValue = FIELD_NAMES.some((key) => !Number.isFinite(numericData[key]));
-    if (hasInvalidValue) {
-      alert('Todos los campos deben tener numeros validos.');
+    const invalidField = FIELD_NAMES.find((key) => {
+      const value = numericData[key];
+      const { min, max } = FIELD_CONFIG[key];
+      return !Number.isFinite(value) || value < min || value > max;
+    });
+
+    if (invalidField) {
+      const { label, min, max } = FIELD_CONFIG[invalidField];
+      alert(`${label} debe estar entre ${min} y ${max}.`);
       return;
     }
 
@@ -55,37 +83,28 @@ export default function RiskForm({ onEvaluate, loading, initialData }) {
     <div className="card">
       <h2>Parametros Ambientales (Satipo)</h2>
       <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-        <div className="form-group">
-          <label>Latitud</label>
-          <input type="number" step="0.000001" name="latitude" value={formData.latitude} onChange={handleChange} required />
-        </div>
-        <div className="form-group">
-          <label>Longitud</label>
-          <input type="number" step="0.000001" name="longitude" value={formData.longitude} onChange={handleChange} required />
-        </div>
-
-        <div className="form-group">
-          <label>Temperatura (C)</label>
-          <input type="number" step="0.1" name="temperature" value={formData.temperature} onChange={handleChange} required />
-        </div>
-        <div className="form-group">
-          <label>Humedad (%)</label>
-          <input type="number" step="0.1" name="humidity" value={formData.humidity} onChange={handleChange} required />
-        </div>
-
-        <div className="form-group">
-          <label>Viento (km/h)</label>
-          <input type="number" step="0.1" name="wind" value={formData.wind} onChange={handleChange} required />
-        </div>
-        <div className="form-group">
-          <label>Pendiente (grados)</label>
-          <input type="number" step="0.1" name="slope" value={formData.slope} onChange={handleChange} required />
-        </div>
-
-        <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-          <label>Indice de Vegetacion (NDVI)</label>
-          <input type="number" step="0.01" name="ndvi" value={formData.ndvi} onChange={handleChange} required />
-        </div>
+        {FIELD_LAYOUT.flatMap((row) => row.map((fieldName) => {
+          const field = FIELD_CONFIG[fieldName];
+          return (
+            <div
+              className="form-group"
+              key={fieldName}
+              style={row.length === 1 ? { gridColumn: '1 / -1' } : undefined}
+            >
+              <label>{field.label}</label>
+              <input
+                type="number"
+                step={field.step}
+                min={field.min}
+                max={field.max}
+                name={fieldName}
+                value={formData[fieldName]}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          );
+        }))}
 
         <div style={{ gridColumn: '1 / -1' }}>
           <button type="submit" className="btn" disabled={loading}>
