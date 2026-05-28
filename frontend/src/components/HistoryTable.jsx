@@ -54,7 +54,7 @@ const HistoryTable = ({ history, onRowClick, onDownloadPDF }) => {
             <th>Ubicacion</th>
             <th>Ambiente</th>
             <th>Terreno</th>
-            <th>Precision</th>
+            <th>Confianza</th>
             <th>Accion</th>
           </tr>
         </thead>
@@ -64,7 +64,7 @@ const HistoryTable = ({ history, onRowClick, onDownloadPDF }) => {
               const { date, time } = formatDateTime(item.created_at || item.fecha);
               const risk = item.risk_level || item.riesgo || 'N/A';
               const riskMeta = getRiskMeta(risk);
-              const probability = item.probability ?? item.probabilidad ?? item.accuracy;
+              const probability = item.probability ?? item.probabilidad;
               const probabilityLabel = formatPercent(probability);
               const probabilityWidth = clampPercent(probability);
               const rowId = item.id ? `#${item.id}` : `#${idx + 1}`;
@@ -114,7 +114,7 @@ const HistoryTable = ({ history, onRowClick, onDownloadPDF }) => {
                   </td>
                   <td className="precision-cell">
                     <div className="precision-head">
-                      <span className="cell-main">Modelo ML</span>
+                      <span className="cell-main">Prediccion ML</span>
                       <span className="precision-value">{probabilityLabel === '-' ? '-' : `${probabilityLabel}%`}</span>
                     </div>
                     <div className="precision-track" aria-hidden="true">

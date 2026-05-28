@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Activity, Database, MapPinned, Server, ShieldCheck } from 'lucide-react';
+import { Activity, MapPinned, ShieldCheck } from 'lucide-react';
 import RiskForm from './components/RiskForm';
 import ResultCard from './components/ResultCard';
 import MapPanel from './components/MapPanel';
@@ -113,18 +113,14 @@ function App() {
             <p>Monitoreo operativo de riesgo forestal</p>
           </div>
         </div>
-        <div className="top-status">
-          <span className="status-pill">
-            <Server size={15} />
-            API Render
-          </span>
-          <span className="status-pill">
-            <Database size={15} />
-            Supabase
-          </span>
-          <span className="status-pill is-neutral">
-            <Activity size={15} />
+        <div className="nav-metrics" aria-label="Resumen del monitoreo">
+          <span className="nav-stat">
+            <Activity size={16} />
             {sortedHistory.length} registros
+          </span>
+          <span className="nav-divider" aria-hidden="true" />
+          <span className="nav-stat">
+            Ultimo riesgo: <strong>{latestRisk}</strong>
           </span>
         </div>
       </nav>
