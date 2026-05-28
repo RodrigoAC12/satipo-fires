@@ -60,8 +60,8 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  height: 72px;
-  padding: 0 28px;
+  height: 66px;
+  padding: 0 24px;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
@@ -139,10 +139,10 @@ button {
 
 .dashboard-main {
   display: grid;
-  grid-template-columns: minmax(350px, 400px) minmax(0, 1fr);
-  gap: 18px;
-  height: calc(100vh - 72px);
-  padding: 18px;
+  grid-template-columns: minmax(320px, 360px) minmax(0, 1fr);
+  gap: 14px;
+  height: calc(100vh - 66px);
+  padding: 14px;
   overflow: hidden;
 }
 
@@ -151,7 +151,7 @@ button {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 .right-panel {
@@ -159,8 +159,8 @@ button {
   height: 100%;
   overflow: hidden;
   display: grid;
-  grid-template-rows: minmax(320px, 1fr) minmax(330px, 40vh);
-  gap: 18px;
+  grid-template-rows: minmax(520px, 1fr) minmax(230px, 28vh);
+  gap: 14px;
 }
 
 .panel,
@@ -210,11 +210,25 @@ button {
 .map-card {
   display: flex;
   flex-direction: column;
+  position: relative;
+  min-height: 520px;
 }
 
 .map-card .panel-header {
-  padding: 18px 18px 0;
-  margin-bottom: 12px;
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  z-index: 500;
+  align-items: center;
+  width: min(760px, calc(100% - 32px));
+  padding: 12px 14px;
+  margin: 0;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(220, 229, 224, 0.92);
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(10px);
 }
 
 .map-container-wrapper {
@@ -225,7 +239,7 @@ button {
 .leaflet-map {
   width: 100%;
   height: 100%;
-  border-radius: 0 0 8px 8px;
+  border-radius: 8px;
 }
 
 .history-section {
@@ -652,6 +666,16 @@ button {
   }
 }
 
+@media (max-height: 820px) and (min-width: 851px) {
+  .right-panel {
+    grid-template-rows: minmax(430px, 1fr) minmax(210px, 26vh);
+  }
+
+  .map-card {
+    min-height: 430px;
+  }
+}
+
 @media (max-width: 850px) {
   html,
   body {
@@ -690,7 +714,15 @@ button {
   }
 
   .map-card {
-    height: 440px;
+    height: 520px;
+    min-height: 520px;
+  }
+
+  .map-card .panel-header {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    width: calc(100% - 24px);
   }
 
   .history-section {

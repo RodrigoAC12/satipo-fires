@@ -139,8 +139,8 @@ function App() {
           <section className="panel map-card">
             <div className="panel-header">
               <div>
-                <h2 className="panel-title">Mapa de vigilancia</h2>
-                <p className="panel-kicker">Satipo, Junin - Peru</p>
+                <h2 className="panel-title">Mapa operativo</h2>
+                <p className="panel-kicker">Selecciona un punto para evaluar riesgo en Satipo</p>
               </div>
               <span className="metric-chip">
                 <MapPinned size={15} />
