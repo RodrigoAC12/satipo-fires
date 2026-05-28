@@ -1,0 +1,47 @@
+{
+  "dataset": "data\\massive_test_dataset_500.csv",
+  "dataset_type": "synthetic_controlled_500_records",
+  "records": 500,
+  "labels": [
+    "Bajo",
+    "Medio",
+    "Alto",
+    "Crítico"
+  ],
+  "accuracy": 1.0,
+  "precision_weighted": 1.0,
+  "recall_weighted": 1.0,
+  "f1_weighted": 1.0,
+  "precision_macro": 1.0,
+  "recall_macro": 1.0,
+  "f1_macro": 1.0,
+  "avg_inference_ms": 3.7781,
+  "max_inference_ms": 8.0912,
+  "confusion_matrix": {
+    "Bajo": {
+      "Bajo": 125,
+      "Medio": 0,
+      "Alto": 0,
+      "Crítico": 0
+    },
+    "Medio": {
+      "Bajo": 0,
+      "Medio": 125,
+      "Alto": 0,
+      "Crítico": 0
+    },
+    "Alto": {
+      "Bajo": 0,
+      "Medio": 0,
+      "Alto": 125,
+      "Crítico": 0
+    },
+    "Crítico": {
+      "Bajo": 0,
+      "Medio": 0,
+      "Alto": 0,
+      "Crítico": 125
+    }
+  },
+  "note": "Estas metricas validan el comportamiento del modelo con data masiva sintetica controlada. Para afirmar precision real del sistema se requiere un dataset historico etiquetado."
+}
