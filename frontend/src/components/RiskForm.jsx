@@ -28,10 +28,13 @@ const createEmptyForm = () => ({
   longitude: '',
 });
 
-const sanitizeFormData = (data = {}) => FIELD_NAMES.reduce((acc, key) => {
-  acc[key] = data[key] ?? '';
-  return acc;
-}, createEmptyForm());
+const sanitizeFormData = (data) => {
+  const source = data ?? {};
+  return FIELD_NAMES.reduce((acc, key) => {
+    acc[key] = source[key] ?? '';
+    return acc;
+  }, createEmptyForm());
+};
 
 export default function RiskForm({ onEvaluate, loading, initialData }) {
   const initialDataKey = useMemo(
